@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'globalvars.dart' as globals;
@@ -16,9 +15,6 @@ class CustomTimerDisplay extends StatelessWidget {
 }
 
 class CustomTimer extends StatefulWidget {
-  // CustomTimer({@required this.title});
-
-  final String title = "Timer";
 
   @override
   _CustomTimerState createState() => _CustomTimerState();
@@ -28,27 +24,22 @@ class _CustomTimerState extends State<CustomTimer> {
   CountDownController _controller = CountDownController();
   int _duration = 100;
   bool isWorkSession = true;
+  bool newTimer = true;
   bool timerRunning = false;
 
-  Color getColor(Set<MaterialState> states) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{
-      MaterialState.pressed,
-      MaterialState.hovered,
-      MaterialState.focused,
-    };
-    if (states.any(interactiveStates.contains)) {
-      return Colors.white;
-    }
-    return Colors.purple;
+  void timerComplete() {
+    print("Award Currency");
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: HexColor.fromHex(globals.primaryColor),
-      body: Column(children: [
+      body: Column(
+          children: [
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Padding(padding: EdgeInsets.fromLTRB(0, 130, 0, 0)),
+          Padding(padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height * 0.17, 0, 0)),
           Text(
             isWorkSession ? "Work Session" : "Break Session",
             textAlign: TextAlign.center,
@@ -56,8 +47,7 @@ class _CustomTimerState extends State<CustomTimer> {
             style: TextStyle(color: HexColor.fromHex(globals.offWhiteColor)),
           )
         ]),
-        Row(mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           CircularCountDownTimer(
             // Countdown duration in Seconds.
             duration: _duration,
@@ -121,32 +111,72 @@ class _CustomTimerState extends State<CustomTimer> {
 
             // This Callback will execute when the Countdown Starts.
             onStart: () {
-              // Here, do whatever you want
-              print('Countdown Started $timerRunning');
             },
 
             // This Callback will execute when the Countdown Ends.
             onComplete: () {
-              // Here, do whatever you want
-              print('Countdown Ended');
+              timerComplete();
             },
           )
         ]),
-        _button(title: "Start", onPressed: () => {timerRunning = !timerRunning,  _controller.start()}),
-        _button(title: "Pause", onPressed: () => {timerRunning = !timerRunning, _controller.pause()}),
-        _button(title: "Resume", onPressed: () => _controller.resume()),
+        newTimer
+            ? _button(
+                title: "Start",
+                onPressed: () => {
+                      setState(() {
+                        timerRunning = true;
+                      }),
+                      setState(() {
+                        newTimer = false;
+                      }),
+                      _controller.start()
+                    })
+            : timerRunning
+                ? _button(
+                    title: "Pause",
+                    onPressed: () => {
+                          setState(() {
+                            timerRunning = false;
+                          }),
+                          _controller.pause()
+                        })
+                : _button(
+                    title: "Resume",
+                    onPressed: () => {
+                          setState(() {
+                            timerRunning = true;
+                          }),
+                          _controller.resume()
+                        }),
+        _button(
+            title: "Reset",
+            onPressed: () => {
+                  setState(() {
+                    timerRunning = !timerRunning;
+                  }),
+                  _controller.start(),
+                  _controller.pause(),
+                  setState(() {
+                    newTimer = true;
+                  })
+                }),
       ]),
     );
   }
 
   _button({@required String title, VoidCallback onPressed}) {
-    return ElevatedButton(
-      child: Text(
-        title,
-        style: TextStyle(color: Colors.white),
-      ),
-      onPressed: onPressed,
-      style: ButtonStyle(backgroundColor: MaterialStateProperty.resolveWith(getColor))
-    );
+    return Container(
+        margin: EdgeInsets.only(bottom: 13),
+      child: ConstrainedBox(constraints: BoxConstraints.tightFor(width: MediaQuery.of(context).size.width * 0.4, height: MediaQuery.of(context).size.height * 0.05),
+      child: ElevatedButton(
+            child: Text(
+              title,
+              style: TextStyle(color: HexColor.fromHex(globals.offWhiteColor)),
+            ),
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              primary: Colors.purple,
+            ),
+        )));
   }
 }
