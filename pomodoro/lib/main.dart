@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'globalvars.dart' as globals;
 
 void main() {
@@ -33,6 +34,102 @@ class HomePage extends StatelessWidget {
   }
 }
 
+final List<Widget> gridTiles = globals.combinations.map((comb) {
+  return Container(
+    decoration: BoxDecoration(
+      border: Border.all(width: 1.0),
+      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+    ),
+    child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+        child: Container(
+          color: HexColor.fromHex(comb.primaryColour),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    child: SizedBox(
+                      width: 25.0,
+                      height: 25.0,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(width: 1.0),
+                          color: HexColor.fromHex(comb.secondaryColour),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: Text(
+                      comb.price.toString() + ' points',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+        )),
+  );
+}).toList();
+
+final List<Widget> imageSliders = globals.items
+    .map((item) => Container(
+          child: Container(
+            margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+            decoration: BoxDecoration(
+              border: Border.all(width: 1.0),
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+              child: SizedBox.expand(
+                  child: Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        fit: BoxFit.cover, image: NetworkImage(item.imageURL))),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Colors.black.withAlpha(0),
+                        Colors.black12,
+                        Colors.black45
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        item.price.toString() + ' points',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )),
+            ),
+          ),
+        ))
+    .toList();
+
 class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext ctxt) {
@@ -41,8 +138,92 @@ class ShopScreen extends StatelessWidget {
         title: new Text("Shop"),
         elevation: 0,
         backgroundColor: HexColor.fromHex(globals.primaryColor),
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+            child: Row(children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.attach_money),
+                onPressed: () {},
+              ),
+              new Text(globals.shopCurrency.toString()),
+            ]),
+          ),
+        ],
       ),
       drawer: MyDrawer(),
+      body: Container(
+        color: HexColor.fromHex(globals.offWhiteColor),
+        child: Container(
+          child: ListView(children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Card(
+                child: Column(children: [
+                  Text(
+                    "Todays deals",
+                    style: TextStyle(
+                      color: Colors.black,
+                      decoration: TextDecoration.underline,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  CarouselSlider(
+                    items: imageSliders,
+                    options: CarouselOptions(
+                      height: 250,
+                      aspectRatio: 16 / 9,
+                      viewportFraction: 0.8,
+                      initialPage: 0,
+                      enableInfiniteScroll: true,
+                      reverse: false,
+                      enlargeCenterPage: true,
+                      scrollDirection: Axis.horizontal,
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Card(
+                child: Column(children: [
+                  Text(
+                    "Weekly Colour Combinations",
+                    style: TextStyle(
+                      color: Colors.black,
+                      decoration: TextDecoration.underline,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 200,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(25, 15, 25, 0),
+                      child: Container(
+                        child: GridView.count(
+                          childAspectRatio: (200 + 20) / 100,
+                          primary: false,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          children: gridTiles,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ]),
+        ),
+      ),
     );
   }
 }
