@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import 'globalvars.dart' as globals;
-import 'globalvars.dart';
 import 'hexcolor.dart';
+import 'customtimer.dart' as timer;
 
 void main() {
   globals.populateMap();
@@ -33,6 +34,9 @@ class HomePage extends StatelessWidget {
       ),
       backgroundColor: HexColor.fromHex(globals.primaryColor),
       drawer: MyDrawer(),
+      body: Container(
+        child: timer.CustomTimer(),
+      ),
     );
   }
 }

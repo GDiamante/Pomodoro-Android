@@ -1,6 +1,7 @@
 library pomodoro.globalbars;
 
 import 'dart:collection';
+import 'dart:ui';
 
 // Colors
 String primaryColor = '#B952E2';
