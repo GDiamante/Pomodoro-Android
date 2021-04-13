@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'globalvars.dart' as globals;
-import 'main.dart';
+import 'hexcolor.dart';
 
 class CustomTimerDisplay extends StatelessWidget {
   CustomTimerDisplay({@required this.time});
