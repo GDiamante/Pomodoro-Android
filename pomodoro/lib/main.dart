@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import 'globalvars.dart' as globals;
+import 'customtimer.dart' as timer;
 
 void main() {
   runApp(MyApp());
@@ -30,6 +32,9 @@ class HomePage extends StatelessWidget {
       ),
       backgroundColor: HexColor.fromHex(globals.primaryColor),
       drawer: MyDrawer(),
+      body: Container(
+        child: timer.CustomTimer(),
+      ),
     );
   }
 }

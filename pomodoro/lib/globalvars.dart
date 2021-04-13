@@ -1,5 +1,7 @@
 library pomodoro.globalbars;
 
+import 'dart:ui';
+
 // Colors
 String primaryColor = '#B952E2';
 String drawerTileColor = '#4D4D4D';
