@@ -1,54 +1,59 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'globalvars.dart' as globals;
 import 'hexcolor.dart';
 
-class CustomTimerDisplay extends StatelessWidget {
-  CustomTimerDisplay({@required this.time});
-
-  final int time;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text('Timer: $time');
-  }
-}
-
 class CustomTimer extends StatefulWidget {
-  // CustomTimer({@required this.title});
-
-  final String title = "Timer";
+  static bool timerRunning = false;
+  static bool newTimer = true;
 
   @override
   _CustomTimerState createState() => _CustomTimerState();
 }
 
 class _CustomTimerState extends State<CustomTimer> {
-  CountDownController _controller = CountDownController();
-  int _duration = 100;
-  bool isWorkSession = true;
-  bool timerRunning = false;
+  CountDownController _controller;
+  int _duration;
+  bool isWorkSession;
+  int timerNumber;
 
-  Color getColor(Set<MaterialState> states) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{
-      MaterialState.pressed,
-      MaterialState.hovered,
-      MaterialState.focused,
-    };
-    if (states.any(interactiveStates.contains)) {
-      return Colors.white;
-    }
-    return Colors.purple;
+  void initState() {
+    super.initState();
+    _duration = globals.workDuration;
+    isWorkSession = true;
+    timerNumber = 1;
+    _controller = CountDownController();
+    CustomTimer.newTimer = true;
+    CustomTimer.timerRunning = false;
+  }
+
+  void timerComplete() {
+    globals.shopCurrency += _duration;
+    setState(() {
+      timerNumber++;
+      isWorkSession = !isWorkSession;
+
+      //Determine length of time for new timer
+      if (timerNumber % 2 == 0 && timerNumber == globals.roundsPerSession + 1) {
+        _duration = globals.longBreakDuration;
+      } else if (timerNumber % 2 == 0) {
+        _duration = globals.breakDuration;
+      } else if (timerNumber % 2 == 1) {
+        _duration = globals.workDuration;
+      }
+    });
+
+    _controller.start();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: HexColor.fromHex(globals.primaryColor),
-      body: Column(children: [
+      body: Column(
+          children: [
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Padding(padding: EdgeInsets.fromLTRB(0, 130, 0, 0)),
+          Padding(padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height * 0.17, 0, 0)),
           Text(
             isWorkSession ? "Work Session" : "Break Session",
             textAlign: TextAlign.center,
@@ -56,8 +61,7 @@ class _CustomTimerState extends State<CustomTimer> {
             style: TextStyle(color: HexColor.fromHex(globals.offWhiteColor)),
           )
         ]),
-        Row(mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           CircularCountDownTimer(
             // Countdown duration in Seconds.
             duration: _duration,
@@ -121,32 +125,70 @@ class _CustomTimerState extends State<CustomTimer> {
 
             // This Callback will execute when the Countdown Starts.
             onStart: () {
-              // Here, do whatever you want
-              print('Countdown Started $timerRunning');
             },
 
             // This Callback will execute when the Countdown Ends.
             onComplete: () {
-              // Here, do whatever you want
-              print('Countdown Ended');
+              timerComplete();
             },
           )
         ]),
-        _button(title: "Start", onPressed: () => {timerRunning = !timerRunning,  _controller.start()}),
-        _button(title: "Pause", onPressed: () => {timerRunning = !timerRunning, _controller.pause()}),
-        _button(title: "Resume", onPressed: () => _controller.resume()),
+            CustomTimer.newTimer
+            ? _button(
+                title: "Start",
+                onPressed: () => {
+                      setState(() {
+                        CustomTimer.timerRunning = true;
+                      }),
+                      setState(() {
+                        CustomTimer.newTimer = false;
+                      }),
+                      _controller.start()
+                    })
+            : CustomTimer.timerRunning
+                ? _button(
+                    title: "Pause",
+                    onPressed: () => {
+                          setState(() {
+                            CustomTimer.timerRunning = false;
+                          }),
+                          _controller.pause()
+                        })
+                : _button(
+                    title: "Resume",
+                    onPressed: () => {
+                          setState(() {
+                            CustomTimer.timerRunning = true;
+                          }),
+                          _controller.resume()
+                        }),
+        _button(
+            title: "Reset",
+            onPressed: () => {
+                  setState(() {
+                    CustomTimer.timerRunning = !CustomTimer.timerRunning;
+                    CustomTimer.newTimer = true;
+                  }),
+                  _controller.start(),
+                  _controller.pause(),
+                }),
       ]),
     );
   }
 
   _button({@required String title, VoidCallback onPressed}) {
-    return ElevatedButton(
-      child: Text(
-        title,
-        style: TextStyle(color: Colors.white),
-      ),
-      onPressed: onPressed,
-      style: ButtonStyle(backgroundColor: MaterialStateProperty.resolveWith(getColor))
-    );
+    return Container(
+        margin: EdgeInsets.only(bottom: 13),
+      child: ConstrainedBox(constraints: BoxConstraints.tightFor(width: MediaQuery.of(context).size.width * 0.4, height: MediaQuery.of(context).size.height * 0.05),
+      child: ElevatedButton(
+            child: Text(
+              title,
+              style: TextStyle(color: HexColor.fromHex(globals.offWhiteColor)),
+            ),
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              primary: Colors.purple,
+            ),
+        )));
   }
 }
