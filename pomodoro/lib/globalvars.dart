@@ -1,6 +1,7 @@
 library pomodoro.globalbars;
 
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ui';
 
 // Colors
@@ -36,6 +37,13 @@ class featuredShopItem extends shopItem {
     this.imageURL = img;
     this.price = pr;
   }
+
+  Map toJson() => {
+    'id': this.id,
+    'price': this.price,
+    'imageURL': this.imageURL,
+    'purchased': this.purchased
+  };
 }
 
 class combinationShopItem extends shopItem {
@@ -49,6 +57,15 @@ class combinationShopItem extends shopItem {
     this.secondaryColour = sec;
     this.purchased = purchased;
   }
+
+  Map toJson() => {
+    'id': this.id,
+    'price': this.price,
+    'primaryColour': this.primaryColour,
+    'secondaryColour': this.secondaryColour,
+    'purchased': this.purchased
+  };
+
 }
 
 List<combinationShopItem> combinations = [
