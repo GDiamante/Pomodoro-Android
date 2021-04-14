@@ -1,7 +1,6 @@
 library pomodoro.globalbars;
 
 import 'dart:collection';
-import 'dart:ui';
 
 // Colors
 String primaryColor = '#B952E2';
@@ -12,6 +11,12 @@ String offWhiteColor = '#EAEAEA';
 bool bannerNotifications = true;
 bool lockNotifications = true;
 bool centerNotifications = true;
+
+//Timer Settings
+int workDuration = 8;
+int breakDuration = 5;
+int longBreakDuration = 8;
+int roundsPerSession = 4; //Number of work sessions before long break
 
 // Misc Settings
 bool soundEffects = true;

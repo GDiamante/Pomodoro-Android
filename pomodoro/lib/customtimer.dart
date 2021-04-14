@@ -3,37 +3,51 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'globalvars.dart' as globals;
 import 'hexcolor.dart';
 
-class CustomTimerDisplay extends StatelessWidget {
-  CustomTimerDisplay({@required this.time});
-
-  final int time;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text('Timer: $time');
-  }
-}
-
 class CustomTimer extends StatefulWidget {
+  static bool timerRunning = false;
+  static bool newTimer = true;
 
   @override
   _CustomTimerState createState() => _CustomTimerState();
 }
 
 class _CustomTimerState extends State<CustomTimer> {
-  CountDownController _controller = CountDownController();
-  int _duration = 100;
-  bool isWorkSession = true;
-  bool newTimer = true;
-  bool timerRunning = false;
+  CountDownController _controller;
+  int _duration;
+  bool isWorkSession;
+  int timerNumber;
+
+  void initState() {
+    super.initState();
+    _duration = globals.workDuration;
+    isWorkSession = true;
+    timerNumber = 1;
+    _controller = CountDownController();
+    CustomTimer.newTimer = true;
+    CustomTimer.timerRunning = false;
+  }
 
   void timerComplete() {
-    print("Award Currency");
+    globals.shopCurrency += _duration;
+    setState(() {
+      timerNumber++;
+      isWorkSession = !isWorkSession;
+
+      //Determine length of time for new timer
+      if (timerNumber % 2 == 0 && timerNumber == globals.roundsPerSession + 1) {
+        _duration = globals.longBreakDuration;
+      } else if (timerNumber % 2 == 0) {
+        _duration = globals.breakDuration;
+      } else if (timerNumber % 2 == 1) {
+        _duration = globals.workDuration;
+      }
+    });
+
+    _controller.start();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: HexColor.fromHex(globals.primaryColor),
       body: Column(
@@ -119,24 +133,24 @@ class _CustomTimerState extends State<CustomTimer> {
             },
           )
         ]),
-        newTimer
+            CustomTimer.newTimer
             ? _button(
                 title: "Start",
                 onPressed: () => {
                       setState(() {
-                        timerRunning = true;
+                        CustomTimer.timerRunning = true;
                       }),
                       setState(() {
-                        newTimer = false;
+                        CustomTimer.newTimer = false;
                       }),
                       _controller.start()
                     })
-            : timerRunning
+            : CustomTimer.timerRunning
                 ? _button(
                     title: "Pause",
                     onPressed: () => {
                           setState(() {
-                            timerRunning = false;
+                            CustomTimer.timerRunning = false;
                           }),
                           _controller.pause()
                         })
@@ -144,7 +158,7 @@ class _CustomTimerState extends State<CustomTimer> {
                     title: "Resume",
                     onPressed: () => {
                           setState(() {
-                            timerRunning = true;
+                            CustomTimer.timerRunning = true;
                           }),
                           _controller.resume()
                         }),
@@ -152,13 +166,11 @@ class _CustomTimerState extends State<CustomTimer> {
             title: "Reset",
             onPressed: () => {
                   setState(() {
-                    timerRunning = !timerRunning;
+                    CustomTimer.timerRunning = !CustomTimer.timerRunning;
+                    CustomTimer.newTimer = true;
                   }),
                   _controller.start(),
                   _controller.pause(),
-                  setState(() {
-                    newTimer = true;
-                  })
                 }),
       ]),
     );

@@ -511,6 +511,23 @@ class failedAlert extends StatelessWidget {
   }
 }
 
+class timerWarningAlert extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+        title: Text("Hold On!"),
+        content: Text("You must reset the timer before navigating away.  This will forfeit your reward for losing focus."),
+        actions: [
+          new TextButton(
+            child: Text("Continue"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ]);
+  }
+}
+
 class CustomizeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext ctxt) {
@@ -666,6 +683,9 @@ class AnalyticsScreen extends StatelessWidget {
 class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    if (!timer.CustomTimer.newTimer) {
+      return timerWarningAlert();
+    }
     return Drawer(
         child: Container(
       color: HexColor.fromHex(globals.drawerTileColor),
