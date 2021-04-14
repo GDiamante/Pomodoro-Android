@@ -6,13 +6,18 @@ import 'hexcolor.dart';
 class CustomTimer extends StatefulWidget {
   static bool timerRunning = false;
   static bool newTimer = true;
+  final Function(dynamic)
+      updateParent; //Updates isWorkSession bool variable for parent
+
+  CustomTimer({Key key, @required this.updateParent}) : super(key: key);
 
   @override
-  _CustomTimerState createState() => _CustomTimerState();
+  CustomTimerState createState() => CustomTimerState();
 }
 
-class _CustomTimerState extends State<CustomTimer> {
-  CountDownController _controller;
+class CustomTimerState extends State<CustomTimer> {
+  CountDownController _workController;
+  CountDownController _breakController;
   int _duration;
   bool isWorkSession;
   int timerNumber;
@@ -22,38 +27,44 @@ class _CustomTimerState extends State<CustomTimer> {
     _duration = globals.workDuration;
     isWorkSession = true;
     timerNumber = 1;
-    _controller = CountDownController();
+    _workController = CountDownController();
+    _breakController = CountDownController();
     CustomTimer.newTimer = true;
     CustomTimer.timerRunning = false;
   }
 
   void timerComplete() {
-    globals.shopCurrency += _duration;
+    if (isWorkSession) {
+      globals.shopCurrency += _duration;
+    }
     setState(() {
       timerNumber++;
-      isWorkSession = !isWorkSession;
+      isWorkSession = timerNumber % 2 == 1;
+      widget.updateParent(isWorkSession);
 
-      //Determine length of time for new timer
-      if (timerNumber % 2 == 0 && timerNumber == globals.roundsPerSession + 1) {
+      //Determine length of time for next timer
+      if (!isWorkSession && timerNumber % (globals.roundsPerSession * 2) == 0) {
         _duration = globals.longBreakDuration;
-      } else if (timerNumber % 2 == 0) {
+      } else if (!isWorkSession) {
         _duration = globals.breakDuration;
-      } else if (timerNumber % 2 == 1) {
+      } else if (isWorkSession) {
         _duration = globals.workDuration;
       }
     });
-
-    _controller.start();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HexColor.fromHex(globals.primaryColor),
-      body: Column(
-          children: [
+      backgroundColor: isWorkSession
+          ? HexColor.fromHex(globals.primaryColor)
+          : HexColor.fromHex(globals.secondaryColor),
+      body: Column(children: [
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Padding(padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height * 0.17, 0, 0)),
+          //Title text
+          Padding(
+              padding: EdgeInsets.fromLTRB(
+                  0, MediaQuery.of(context).size.height * 0.17, 0, 0)),
           Text(
             isWorkSession ? "Work Session" : "Break Session",
             textAlign: TextAlign.center,
@@ -62,78 +73,11 @@ class _CustomTimerState extends State<CustomTimer> {
           )
         ]),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          CircularCountDownTimer(
-            // Countdown duration in Seconds.
-            duration: _duration,
-
-            // Countdown initial elapsed Duration in Seconds.
-            initialDuration: 0,
-
-            // Controls (i.e Start, Pause, Resume, Restart) the Countdown Timer.
-            controller: _controller,
-
-            // Width of the Countdown Widget.
-            width: MediaQuery.of(context).size.width / 2,
-
-            // Height of the Countdown Widget.
-            height: MediaQuery.of(context).size.height / 2,
-
-            // Ring Color for Countdown Widget.
-            ringColor: HexColor.fromHex(globals.primaryColor),
-
-            // Ring Gradient for Countdown Widget.
-            ringGradient: null,
-
-            // Filling Color for Countdown Widget.
-            fillColor: HexColor.fromHex(globals.offWhiteColor),
-
-            // Filling Gradient for Countdown Widget.
-            fillGradient: null,
-
-            // Background Color for Countdown Widget.
-            backgroundColor: HexColor.fromHex(globals.primaryColor),
-
-            // Background Gradient for Countdown Widget.
-            backgroundGradient: null,
-
-            // Border Thickness of the Countdown Ring.
-            strokeWidth: 5.0,
-
-            // Begin and end contours with a flat edge and no extension.
-            strokeCap: StrokeCap.square,
-
-            // Text Style for Countdown Text.
-            textStyle: TextStyle(
-                fontSize: 33.0,
-                color: HexColor.fromHex(globals.offWhiteColor),
-                fontWeight: FontWeight.bold),
-
-            // Format for the Countdown Text.
-            textFormat: CountdownTextFormat.MM_SS,
-
-            // Handles Countdown Timer (true for Reverse Countdown (max to 0), false for Forward Countdown (0 to max)).
-            isReverse: true,
-
-            // Handles Animation Direction (true for Reverse Animation, false for Forward Animation).
-            isReverseAnimation: true,
-
-            // Handles visibility of the Countdown Text.
-            isTimerTextShown: true,
-
-            // Handles the timer start.
-            autoStart: false,
-
-            // This Callback will execute when the Countdown Starts.
-            onStart: () {
-            },
-
-            // This Callback will execute when the Countdown Ends.
-            onComplete: () {
-              timerComplete();
-            },
-          )
+          //Timer Display
+          Visibility(visible: isWorkSession, child: _workTimer(_duration)),
+          Visibility(visible: !isWorkSession, child: _breakTimer(_duration))
         ]),
-            CustomTimer.newTimer
+        CustomTimer.newTimer //Control Buttons change based on timer state
             ? _button(
                 title: "Start",
                 onPressed: () => {
@@ -143,7 +87,9 @@ class _CustomTimerState extends State<CustomTimer> {
                       setState(() {
                         CustomTimer.newTimer = false;
                       }),
-                      _controller.start()
+                      isWorkSession
+                          ? _workController.start()
+                          : _breakController.start()
                     })
             : CustomTimer.timerRunning
                 ? _button(
@@ -152,7 +98,9 @@ class _CustomTimerState extends State<CustomTimer> {
                           setState(() {
                             CustomTimer.timerRunning = false;
                           }),
-                          _controller.pause()
+                          isWorkSession
+                              ? _workController.pause()
+                              : _breakController.pause()
                         })
                 : _button(
                     title: "Resume",
@@ -160,7 +108,9 @@ class _CustomTimerState extends State<CustomTimer> {
                           setState(() {
                             CustomTimer.timerRunning = true;
                           }),
-                          _controller.resume()
+                          isWorkSession
+                              ? _workController.resume()
+                              : _breakController.resume()
                         }),
         _button(
             title: "Reset",
@@ -169,26 +119,189 @@ class _CustomTimerState extends State<CustomTimer> {
                     CustomTimer.timerRunning = !CustomTimer.timerRunning;
                     CustomTimer.newTimer = true;
                   }),
-                  _controller.start(),
-                  _controller.pause(),
+                  isWorkSession
+                      ? _workController.start()
+                      : _breakController.start(),
+                  isWorkSession
+                      ? _workController.pause()
+                      : _breakController.pause(),
                 }),
       ]),
     );
   }
 
+  //Need two timers to to ensure state updates
+  CircularCountDownTimer _workTimer(int workLength) {
+    return CircularCountDownTimer(
+      // Countdown duration in Seconds.
+      duration: workLength,
+
+      // Countdown initial elapsed Duration in Seconds.
+      initialDuration: 0,
+
+      // Controls (i.e Start, Pause, Resume, Restart) the Countdown Timer.
+      controller: _workController,
+
+      // Width of the Countdown Widget.
+      width: MediaQuery.of(context).size.width / 2,
+
+      // Height of the Countdown Widget.
+      height: MediaQuery.of(context).size.height / 2,
+
+      // Ring Color for Countdown Widget.
+      ringColor: HexColor.fromHex(globals.primaryColor),
+
+      // Ring Gradient for Countdown Widget.
+      ringGradient: null,
+
+      // Filling Color for Countdown Widget.
+      fillColor: HexColor.fromHex(globals.offWhiteColor),
+
+      // Filling Gradient for Countdown Widget.
+      fillGradient: null,
+
+      // Background Color for Countdown Widget.
+      backgroundColor: HexColor.fromHex(globals.primaryColor),
+
+      // Background Gradient for Countdown Widget.
+      backgroundGradient: null,
+
+      // Border Thickness of the Countdown Ring.
+      strokeWidth: 5.0,
+
+      // Begin and end contours with a flat edge and no extension.
+      strokeCap: StrokeCap.square,
+
+      // Text Style for Countdown Text.
+      textStyle: TextStyle(
+          fontSize: 33.0,
+          color: HexColor.fromHex(globals.offWhiteColor),
+          fontWeight: FontWeight.bold),
+
+      // Format for the Countdown Text.
+      textFormat: CountdownTextFormat.MM_SS,
+
+      // Handles Countdown Timer (true for Reverse Countdown (max to 0), false for Forward Countdown (0 to max)).
+      isReverse: true,
+
+      // Handles Animation Direction (true for Reverse Animation, false for Forward Animation).
+      isReverseAnimation: true,
+
+      // Handles visibility of the Countdown Text.
+      isTimerTextShown: true,
+
+      // Handles the timer start.
+      autoStart: timerNumber == 1 ? false : true,
+      //Start automatically after a break
+
+      // This Callback will execute when the Countdown Starts.
+      onStart: () {},
+
+      // This Callback will execute when the Countdown Ends.
+      onComplete: () {
+        timerComplete();
+      },
+    );
+  }
+
+  CircularCountDownTimer _breakTimer(int breakLength) {
+    return CircularCountDownTimer(
+      // Countdown duration in Seconds.
+      duration: breakLength,
+
+      // Countdown initial elapsed Duration in Seconds.
+      initialDuration: 0,
+
+      // Controls (i.e Start, Pause, Resume, Restart) the Countdown Timer.
+      controller: _breakController,
+
+      // Width of the Countdown Widget.
+      width: MediaQuery.of(context).size.width / 2,
+
+      // Height of the Countdown Widget.
+      height: MediaQuery.of(context).size.height / 2,
+
+      // Ring Color for Countdown Widget.
+      ringColor: HexColor.fromHex(globals.secondaryColor),
+
+      // Ring Gradient for Countdown Widget.
+      ringGradient: null,
+
+      // Filling Color for Countdown Widget.
+      fillColor: HexColor.fromHex(globals.offWhiteColor),
+
+      // Filling Gradient for Countdown Widget.
+      fillGradient: null,
+
+      // Background Color for Countdown Widget.
+      backgroundColor: HexColor.fromHex(globals.secondaryColor),
+
+      // Background Gradient for Countdown Widget.
+      backgroundGradient: null,
+
+      // Border Thickness of the Countdown Ring.
+      strokeWidth: 5.0,
+
+      // Begin and end contours with a flat edge and no extension.
+      strokeCap: StrokeCap.square,
+
+      // Text Style for Countdown Text.
+      textStyle: TextStyle(
+          fontSize: 33.0,
+          color: HexColor.fromHex(globals.offWhiteColor),
+          fontWeight: FontWeight.bold),
+
+      // Format for the Countdown Text.
+      textFormat: CountdownTextFormat.MM_SS,
+
+      // Handles Countdown Timer (true for Reverse Countdown (max to 0), false for Forward Countdown (0 to max)).
+      isReverse: true,
+
+      // Handles Animation Direction (true for Reverse Animation, false for Forward Animation).
+      isReverseAnimation: true,
+
+      // Handles visibility of the Countdown Text.
+      isTimerTextShown: true,
+
+      // Handles the timer start.
+      autoStart: true,
+
+      // This Callback will execute when the Countdown Starts.
+      onStart: () {},
+
+      // This Callback will execute when the Countdown Ends.
+      onComplete: () {
+        timerComplete();
+      },
+    );
+  }
+
   _button({@required String title, VoidCallback onPressed}) {
+    Color bgColor = Colors.blueGrey;
+    if (title == "Start" || title == "Resume") {
+      bgColor = Colors.green;
+    } else if (title == "Reset") {
+      bgColor = Colors.red;
+    } else if (title == "Pause") {
+      bgColor = Colors.orange;
+    }
+
     return Container(
         margin: EdgeInsets.only(bottom: 13),
-      child: ConstrainedBox(constraints: BoxConstraints.tightFor(width: MediaQuery.of(context).size.width * 0.4, height: MediaQuery.of(context).size.height * 0.05),
-      child: ElevatedButton(
-            child: Text(
-              title,
-              style: TextStyle(color: HexColor.fromHex(globals.offWhiteColor)),
-            ),
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              primary: Colors.purple,
-            ),
-        )));
+        child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(
+                width: MediaQuery.of(context).size.width * 0.4,
+                height: MediaQuery.of(context).size.height * 0.05),
+            child: ElevatedButton(
+              child: Text(
+                title,
+                style:
+                    TextStyle(color: HexColor.fromHex(globals.offWhiteColor)),
+              ),
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                primary: bgColor,
+              ),
+            )));
   }
 }

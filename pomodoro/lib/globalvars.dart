@@ -4,6 +4,7 @@ import 'dart:collection';
 
 // Colors
 String primaryColor = '#B952E2';
+String secondaryColor = '#15CECE';
 String drawerTileColor = '#4D4D4D';
 String offWhiteColor = '#EAEAEA';
 
@@ -13,10 +14,10 @@ bool lockNotifications = true;
 bool centerNotifications = true;
 
 //Timer Settings
-int workDuration = 8;
-int breakDuration = 5;
+int workDuration = 5;
+int breakDuration = 3;
 int longBreakDuration = 8;
-int roundsPerSession = 4; //Number of work sessions before long break
+int roundsPerSession = 2; //Number of work sessions before long break
 
 // Misc Settings
 bool soundEffects = true;

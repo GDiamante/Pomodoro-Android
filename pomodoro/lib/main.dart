@@ -25,19 +25,51 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool isWorkSession = true;
+
   @override
   Widget build(BuildContext ctxt) {
+
+    //Passed to timer for update
+    void updateWorkSession(dynamic isWorkSessionTimer) {
+      setState(() {
+        if (isWorkSessionTimer is bool) {
+          isWorkSession = isWorkSessionTimer;
+        }
+      });
+    }
+
     return new Scaffold(
-      appBar: new AppBar(
-        backgroundColor: HexColor.fromHex(globals.primaryColor),
-        elevation: 0,
-      ),
+      appBar: CustomAppBar(isWork: isWorkSession), //isWorkSession used for colour
       backgroundColor: HexColor.fromHex(globals.primaryColor),
       drawer: MyDrawer(),
       body: Container(
-        child: timer.CustomTimer(),
+        child: timer.CustomTimer(updateParent: updateWorkSession),
       ),
+    );
+  }
+}
+
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final bool isWork;
+  final Size preferredSize;
+
+  CustomAppBar({Key key, @required this.isWork}) : preferredSize = Size.fromHeight(60.0), super(key: key);
+  @override
+  _CustomAppBarState createState() => _CustomAppBarState();
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  Widget build(BuildContext ctxt) {
+    return new AppBar(
+      backgroundColor: widget.isWork ? HexColor.fromHex(globals.primaryColor) : HexColor.fromHex(globals.secondaryColor),
+      elevation: 0,
     );
   }
 }
