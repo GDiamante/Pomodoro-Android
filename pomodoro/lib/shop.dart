@@ -159,10 +159,12 @@ class _combAlert extends State<combAlert> {
               })()),
               onPressed: () {
                 setState(() {
-                  if (state == 0 && globals.shopCurrency > globals.hashMap[widget.id].price) {
+                  if (state == 0 && globals.shopCurrency > globals.shopItems[widget.id].price) {
                     state++;
-                    globals.shopCurrency -= globals.hashMap[widget.id].price;
-                    globals.hashMap[widget.id].purchased = true;
+                    globals.shopCurrency -= globals.shopItems[widget.id].price;
+                    globals.shopItems[widget.id].purchased = true;
+                    globals.purchasedItems[widget.id] = globals.shopItems[widget.id];
+                    globals.writeFile();
                     widget.myShop.setState(() {});
                     var parentState = null;
                     if (widget.itemState is _imageSlide) {
@@ -222,11 +224,11 @@ class _combAlert extends State<combAlert> {
                 border: Border.all(width: 1.0),
                 borderRadius: BorderRadius.all(Radius.circular(5.0)),
               ),
-              child: (globals.hashMap[widget.id] is globals.combinationShopItem)
+              child: (globals.shopItems[widget.id] is globals.combinationShopItem)
                   ? ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Container(
-                    color: HexColor.fromHex(globals.hashMap[widget.id].primaryColour),
+                    color: HexColor.fromHex(globals.shopItems[widget.id].primaryColour),
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
@@ -238,7 +240,7 @@ class _combAlert extends State<combAlert> {
                             decoration: BoxDecoration(
                               border: Border.all(width: 1.0),
                               color:
-                              HexColor.fromHex(globals.hashMap[widget.id].secondaryColour),
+                              HexColor.fromHex(globals.shopItems[widget.id].secondaryColour),
                             ),
                           ),
                         ),
@@ -252,7 +254,7 @@ class _combAlert extends State<combAlert> {
                       decoration: BoxDecoration(
                           image: DecorationImage(
                               fit: BoxFit.cover,
-                              image: NetworkImage(globals.hashMap[widget.id].imageURL))),
+                              image: NetworkImage(globals.shopItems[widget.id].imageURL))),
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -272,7 +274,7 @@ class _combAlert extends State<combAlert> {
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
               child: Text(
-                globals.hashMap[widget.id].price.toString() + " points",
+                globals.shopItems[widget.id].price.toString() + " points",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 20.0,
@@ -322,7 +324,7 @@ class _combination extends State<combination> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (globals.hashMap[widget.id].purchased) return;
+        if (globals.shopItems[widget.id].purchased) return;
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -342,7 +344,7 @@ class _combination extends State<combination> {
         child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Container(
-              color: HexColor.fromHex(globals.hashMap[widget.id].primaryColour),
+              color: HexColor.fromHex(globals.shopItems[widget.id].primaryColour),
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -356,7 +358,7 @@ class _combination extends State<combination> {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               border: Border.all(width: 1.0),
-                              color: HexColor.fromHex(globals.hashMap[widget.id].secondaryColour),
+                              color: HexColor.fromHex(globals.shopItems[widget.id].secondaryColour),
                             ),
                           ),
                         ),
@@ -368,10 +370,10 @@ class _combination extends State<combination> {
                         padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                         child: Text(
                           (() {
-                            if (globals.hashMap[widget.id].purchased) {
+                            if (globals.shopItems[widget.id].purchased) {
                               return 'Purchased!';
                             } else {
-                              return globals.hashMap[widget.id].price.toString() + ' points';
+                              return globals.shopItems[widget.id].price.toString() + ' points';
                             }
                           }()),
                           style: TextStyle(
@@ -409,7 +411,7 @@ class _imageSlide extends State<imageSlide> {
     return Container(
       child: GestureDetector(
         onTap: () {
-          if (globals.hashMap[widget.id].purchased) return;
+          if (globals.shopItems[widget.id].purchased) return;
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -433,7 +435,7 @@ class _imageSlide extends State<imageSlide> {
                 child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          fit: BoxFit.cover, image: NetworkImage(globals.hashMap[widget.id].imageURL))),
+                          fit: BoxFit.cover, image: NetworkImage(globals.shopItems[widget.id].imageURL))),
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -452,10 +454,10 @@ class _imageSlide extends State<imageSlide> {
                         alignment: Alignment.bottomLeft,
                         child: Text(
                           (() {
-                            if (globals.hashMap[widget.id].purchased) {
+                            if (globals.shopItems[widget.id].purchased) {
                               return 'Purchased!';
                             } else {
-                              return globals.hashMap[widget.id].price.toString() + ' points';
+                              return globals.shopItems[widget.id].price.toString() + ' points';
                             }
                           }()),
                           style: TextStyle(

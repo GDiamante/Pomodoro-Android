@@ -7,8 +7,9 @@ import 'shop.dart';
 import 'customize.dart';
 
 void main() {
-  globals.populateMap();
   runApp(MyApp());
+  globals.populateMap();
+  globals.readFile();
 }
 
 class MyApp extends StatelessWidget {
@@ -90,6 +91,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                     setState(() {
                       globals.bannerNotifications = val;
                     });
+                    globals.writeFile();
                   },
                 ),
                 SwitchListTile(
@@ -99,6 +101,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                     setState(() {
                       globals.lockNotifications = val;
                     });
+                    globals.writeFile();
                   },
                 ),
                 SwitchListTile(
@@ -108,6 +111,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                     setState(() {
                       globals.centerNotifications = val;
                     });
+                    globals.writeFile();
                   },
                 )
               ])),
@@ -129,6 +133,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                       setState(() {
                         globals.soundEffects = val;
                       });
+                      globals.writeFile();
                     },
                   ),
                   SwitchListTile(
@@ -138,6 +143,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                       setState(() {
                         globals.preventScreenLock = val;
                       });
+                      globals.writeFile();
                     },
                   ),
                   SwitchListTile(
@@ -147,6 +153,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                       setState(() {
                         globals.vibrateOnSilent = val;
                       });
+                      globals.writeFile();
                     },
                   )
                 ])),
