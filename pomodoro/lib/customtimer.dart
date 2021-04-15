@@ -59,8 +59,6 @@ class CustomTimerState extends State<CustomTimer> {
 
   @override
   Widget build(BuildContext context) {
-    _duration = globals.workDuration;
-
     //Need two timers to to ensure state updates
     CircularCountDownTimer _workTimer(int workLength) {
       return new CircularCountDownTimer(
