@@ -9,14 +9,13 @@ import 'customize.dart';
 void main() {
   runApp(MyApp());
   globals.populateMap();
-  globals.readFile();
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Pomodoro',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -28,15 +27,18 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   bool isWorkSession = true;
+
+  initState() {
+    globals.readFile(this);
+  }
 
   @override
   Widget build(BuildContext ctxt) {
-
     //Passed to timer for update
     void updateWorkSession(dynamic isWorkSessionTimer) {
       setState(() {

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:pomodoro/main.dart' as main;
 
 // Colors
 String primaryColor = '#B952E2';
@@ -30,6 +31,7 @@ bool vibrateOnSilent = true;
 
 //Shop & currency
 int shopCurrency = 10000;
+String currentThemeId = "Cdefault";
 
 abstract class shopItem {
   String id;
@@ -79,9 +81,6 @@ class combinationShopItem extends shopItem {
     'purchased': this.purchased,
     'productName': this.productName
   };
-
-
-
 }
 
 List<combinationShopItem> combinations = [
@@ -112,6 +111,7 @@ void populateMap() {
   for(int j = 0; j < items.length; j++) {
     shopItems.putIfAbsent(items.elementAt(j).id, () => items.elementAt(j));
   }
+  purchasedItems["Cdefault"] = new combinationShopItem("Cdefault", 0, "#B952E2", '#15CECE', true, "[Default] Purple/Blue");
 }
 
 
@@ -130,7 +130,8 @@ String encodeSettings() {
       + ',\"soundEffects\": ' + jsonEncode(soundEffects)
       + ',\"preventScreenLock\": ' + jsonEncode(preventScreenLock)
       + ',\"vibrateOnSilent\": ' + jsonEncode(vibrateOnSilent)
-      + ',\"shopCurrency\": ' + jsonEncode(shopCurrency);
+      + ',\"shopCurrency\": ' + jsonEncode(shopCurrency)
+      + ',\"currentThemeId\": ' + jsonEncode(currentThemeId);
   return ret;
 }
 
@@ -154,27 +155,36 @@ void updateGlobals(Map<String, dynamic> input) {
   roundsPerSession = input["roundsPerSession"];
   soundEffects = input["soundEffects"];
   preventScreenLock = input["preventScreenLock"];
+  vibrateOnSilent = input["vibrateOnSilent"];
   shopCurrency = input["shopCurrency"];
+  currentThemeId = input["currentThemeId"];
   Map<String, dynamic> data = input["purchased"];
   for (String key in data.keys) {
     Map<String, dynamic> item = data[key];
     if (item["id"].toString().startsWith("C")) {
       combinationShopItem cItem = new combinationShopItem(key, item["price"], item["primaryColour"], item["secondaryColour"], item["purchased"], item["productName"]);
       purchasedItems[key] = cItem;
-      (shopItems[key] as combinationShopItem).purchased = cItem.purchased;
+      if (shopItems.containsKey(key)) {
+        (shopItems[key] as combinationShopItem).purchased = cItem.purchased;
+      }
     } else {
-      featuredShopItem fItem = new featuredShopItem(key, item["price"], item["imageURL"], item["purchased"], item["productName"]);
+      featuredShopItem fItem = new featuredShopItem(
+          key, item["price"], item["imageURL"], item["purchased"],
+          item["productName"]);
       purchasedItems[key] = fItem;
-      (shopItems[key] as featuredShopItem).purchased = fItem.purchased;
+      if (shopItems.containsKey(key)) {
+        (shopItems[key] as featuredShopItem).purchased = fItem.purchased;
+      }
     }
   }
 }
 
-void readFile() {
+void readFile(main.HomePageState home) {
   var configFuture = _read();
   configFuture.then((config) {
     Map<String, dynamic> configMap = jsonDecode(config);
     updateGlobals(configMap);
+    home.setState(() {});
   });
 }
 
