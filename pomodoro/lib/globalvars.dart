@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'main.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 // Colors
@@ -170,7 +171,7 @@ void updateGlobals(Map<String, dynamic> input) {
   }
 }
 
-void readFile() {
+void readFile(_HomePageState) {
   var configFuture = _read();
   configFuture.then((config) {
     Map<String, dynamic> configMap = jsonDecode(config);

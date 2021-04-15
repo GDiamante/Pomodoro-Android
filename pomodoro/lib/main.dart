@@ -5,12 +5,14 @@ import 'hexcolor.dart';
 import 'customtimer.dart' as timer;
 import 'shop.dart';
 import 'customize.dart';
+import 'analytics.dart';
 
 void main() {
   runApp(MyApp());
   globals.populateMap();
-  globals.readFile();
 }
+
+HomePage page = new HomePage();
 
 class MyApp extends StatelessWidget {
   @override
@@ -21,7 +23,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: new HomePage(),
+      home: page,
     );
   }
 }
@@ -36,7 +38,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext ctxt) {
-
     //Passed to timer for update
     void updateWorkSession(dynamic isWorkSessionTimer) {
       setState(() {
@@ -45,6 +46,8 @@ class _HomePageState extends State<HomePage> {
         }
       });
     }
+
+    globals.readFile(this);
 
     return new Scaffold(
       appBar: CustomAppBar(isWork: isWorkSession), //isWorkSession used for colour
@@ -231,7 +234,13 @@ class AnalyticsScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: HexColor.fromHex(globals.primaryColor),
       ),
+      backgroundColor: HexColor.fromHex(globals.offWhiteColor),
       drawer: MyDrawer(),
+      body: Column(children: [
+        AnalyticsChart(),
+        StatsCard(),
+      ],
+      ),
     );
   }
 }
