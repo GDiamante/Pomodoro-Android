@@ -43,6 +43,13 @@ abstract class shopItem {
   String productName;
   bool purchased;
   int price;
+
+  bool operator ==(object) {
+    if (object != null && object is shopItem && (object as shopItem).id.compareTo(id) == 0) {
+      return true;
+    }
+    return false;
+  }
 }
 
 class featuredShopItem extends shopItem {
@@ -54,6 +61,13 @@ class featuredShopItem extends shopItem {
     this.purchased = purchased;
     this.imageURL = img;
     this.price = pr;
+  }
+
+  bool operator ==(object) {
+    if (object != null && object is featuredShopItem && (object as featuredShopItem).id.compareTo(id) == 0) {
+      return true;
+    }
+    return false;
   }
 
   Map toJson() => {
@@ -76,6 +90,13 @@ class combinationShopItem extends shopItem {
     this.primaryColour = prim;
     this.secondaryColour = sec;
     this.purchased = purchased;
+  }
+
+  bool operator ==(object) {
+    if (object != null && object is combinationShopItem && (object as combinationShopItem).id.compareTo(id) == 0) {
+      return true;
+    }
+    return false;
   }
 
   Map toJson() => {
@@ -123,6 +144,7 @@ void populateMap() {
 String encodeSettings() {
   String ret = "";
   ret = '\"primaryColor\": ' + jsonEncode(primaryColor)
+      + ',\"secondaryColor\": ' + jsonEncode(secondaryColor)
       + ',\"drawerTileColor\": ' + jsonEncode(drawerTileColor)
       + ',\"offWhiteColor\": ' + jsonEncode(offWhiteColor)
       + ',\"bannerNotifications\": ' + jsonEncode(bannerNotifications)
@@ -143,17 +165,9 @@ String encodeSettings() {
   return ret;
 }
 
-String fileName = "config.json";
-
-void writeFile() {
-  print(purchasedItems.length);
-  print(purchasedItems);
-  _write();
-}
-
 void updateGlobals(Map<String, dynamic> input) {
-  print(input);
   primaryColor = input["primaryColor"];
+  secondaryColor = input["secondaryColor"];
   drawerTileColor = input["drawerTileColor"];
   offWhiteColor = input["offWhiteColor"];
   bannerNotifications = input["bannerNotifications"];
@@ -192,15 +206,8 @@ void updateGlobals(Map<String, dynamic> input) {
   }
 }
 
-
-
-void readFile(main.HomePageState home) {
-  var configFuture = _read();
-  configFuture.then((config) {
-    Map<String, dynamic> configMap = jsonDecode(config);
-    updateGlobals(configMap);
-    home.setState(() {});
-  });
+void writeFile() {
+  _write();
 }
 
 _write() async {
@@ -221,4 +228,13 @@ Future<String> _read() async {
     print("Couldn't read file");
   }
   return config;
+}
+
+void readFile(main.HomePageState home) {
+  var configFuture = _read();
+  configFuture.then((config) {
+    Map<String, dynamic> configMap = jsonDecode(config);
+    updateGlobals(configMap);
+    home.setState(() {});
+  });
 }

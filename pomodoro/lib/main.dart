@@ -36,6 +36,10 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   bool isWorkSession = true;
 
+  initState() {
+    globals.readFile(this);
+  }
+
   @override
   Widget build(BuildContext ctxt) {
     //Passed to timer for update
@@ -46,8 +50,6 @@ class HomePageState extends State<HomePage> {
         }
       });
     }
-
-    globals.readFile(this);
 
     return new Scaffold(
       appBar: CustomAppBar(isWork: isWorkSession), //isWorkSession used for colour
