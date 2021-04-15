@@ -18,11 +18,15 @@ bool bannerNotifications = true;
 bool lockNotifications = true;
 bool centerNotifications = true;
 
-//Timer Settings
+//Timer Values
 int workDuration = 5;
 int breakDuration = 3;
 int longBreakDuration = 8;
 int roundsPerSession = 2; //Number of work sessions before long break
+int allTimeSessions = 0;
+int allTimeWorkSessions = 0;
+int allTimeBreakSessions = 0;
+
 
 // Misc Settings
 bool soundEffects = true;
@@ -127,6 +131,9 @@ String encodeSettings() {
       + ',\"breakDuration\": ' + jsonEncode(breakDuration)
       + ',\"longBreakDuration\": ' + jsonEncode(longBreakDuration)
       + ',\"roundsPerSession\": ' + jsonEncode(roundsPerSession)
+      + ',\"allTimeSessions\": ' + jsonEncode(allTimeSessions)
+      + ',\"allTimeWorkSessions\": ' + jsonEncode(allTimeWorkSessions)
+      + ',\"allTimeBreakSessions\": ' + jsonEncode(allTimeBreakSessions)
       + ',\"soundEffects\": ' + jsonEncode(soundEffects)
       + ',\"preventScreenLock\": ' + jsonEncode(preventScreenLock)
       + ',\"vibrateOnSilent\": ' + jsonEncode(vibrateOnSilent)
@@ -153,6 +160,9 @@ void updateGlobals(Map<String, dynamic> input) {
   breakDuration = input["breakDuration"];
   longBreakDuration = input["longBreakDuration"];
   roundsPerSession = input["roundsPerSession"];
+  input["allTimeSessions"] != null ? allTimeSessions = input["allTimeSessions"] : allTimeSessions = 0;
+  input["allTimeWorkSessions"] != null ? allTimeWorkSessions = input["allTimeWorkSessions"] : allTimeWorkSessions = 0;
+  input["allTimeBreakSessions"] != null ? allTimeBreakSessions = input["allTimeBreakSessions"] : allTimeBreakSessions = 0;
   soundEffects = input["soundEffects"];
   preventScreenLock = input["preventScreenLock"];
   vibrateOnSilent = input["vibrateOnSilent"];
